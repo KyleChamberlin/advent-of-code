@@ -3,3 +3,6 @@
 .vscode
 target
 main
+input*.txt
+.env
+.envain
