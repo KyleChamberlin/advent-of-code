@@ -10,15 +10,15 @@ pub fn process(input: &str) -> miette::Result<String> {
     for line in input.lines() {
         let mut items = line.split_whitespace();
 
-        left.push(items.next().unwrap().parse::<isize>().unwrap(),);
+        left.push(items.next().unwrap().parse::<isize>().unwrap());
 
-        right.push(items.next().unwrap().parse::<isize>().unwrap(),);
+        right.push(items.next().unwrap().parse::<isize>().unwrap());
     }
 
     left.sort();
     right.sort();
 
-    let result: isize = zip(left,right).map(|(l,r)| (l-r).abs()).sum();
+    let result: isize = zip(left, right).map(|(l, r)| (l - r).abs()).sum();
 
     Ok(result.to_string())
 }
