@@ -2,6 +2,7 @@
 _.file = '.env'
 
 [tools]
-rust = "latest"
 "cargo:cargo-generate" = "latest"
 "cargo:cargo-watch" = "latest"
+rust = "nightly"
+"cargo:cargo-nextest" = "latest"
