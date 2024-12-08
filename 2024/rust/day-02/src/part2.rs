@@ -1,69 +1,106 @@
+use core::panic;
+
 #[tracing::instrument]
 pub fn process(input: &str) -> miette::Result<String> {
     let mut safe_report_count: usize = 0;
 
-    'report: for report in input.lines() {
-        let mut bad_levels = 0;
-        let mut levels = report
+    for report in input.lines() {
+        let levels: Vec<isize> = report
             .split_whitespace()
-            .map(|l| l.parse::<isize>().unwrap());
+            .map(|l| l.parse::<isize>().unwrap())
+            .collect();
 
-        let first_level = levels.next().unwrap();
-        let mut second_level = levels.next().unwrap();
-
-        if (first_level - second_level).abs() == 0 && (first_level - second_level).abs() > 3 {
-            bad_levels += 1;
-            second_level = levels.next().unwrap();
-        };
-        if (first_level - second_level).abs() == 0 && (first_level - second_level).abs() > 3 {
-            continue;
-        };
-
-        let direction: Direction = if (first_level - second_level) < 0 {
-            Direction::DOWN
+        if is_safe_with_exception(levels) {
+            safe_report_count += 1;
         } else {
-            Direction::UP
-        };
-        let mut last_level = second_level;
-        for level in levels {
-            let diff = last_level - level;
-            if diff.abs() > 3 {
-                bad_levels += 1;
-            };
-            if diff == 0 {
-                bad_levels += 1;
-            };
-
-            match direction {
-                Direction::UP => {
-                    if diff < 0 {
-                        bad_levels += 1;
-                        continue 'report;
-                    };
-                }
-                Direction::DOWN => {
-                    if diff > 0 {
-                        bad_levels += 1;
-                        continue 'report;
-                    };
-                }
-            }
-
-            if bad_levels > 1 {
-                continue 'report;
-            }
-
-            last_level = level;
+            eprintln!("{}", report)
         }
-        safe_report_count += 1
     }
 
     Ok(safe_report_count.to_string())
 }
 
+fn is_safe_with_exception(levels: Vec<isize>) -> bool {
+    match is_safe(&levels) {
+        Status::Safe => true,
+        Status::BadLevel(i) => {
+            for idx in 0..levels.len() {
+                if is_safe(&levels.without(idx)) == Status::Safe {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+}
+
+trait Without {
+    fn without(&self, i: usize) -> Vec<isize>;
+}
+impl Without for Vec<isize> {
+    fn without(&self, i: usize) -> Vec<isize> {
+        if i == 0 {
+            eprintln!("removing 0: {:?}", self);
+            return self[1..].to_vec();
+        }
+        if i == (self.len() - 1) {
+            eprintln!("removing {}: {:?}", i, self);
+            return self[..i].to_vec();
+        }
+        if i >= self.len() {
+            panic!("you done fucked up")
+        }
+        let mut vec =  self.clone();
+        vec.remove(i);
+
+        vec
+    }
+}
+
+fn is_safe(levels: &[isize]) -> Status {
+    let mut level_iter = levels.iter().enumerate();
+    let (_, mut last_level) = level_iter.next().unwrap();
+    let mut direction: Direction = Direction::Undefined;
+    for (i, level) in level_iter {
+        let diff = last_level - level;
+        if diff.abs() > 3 || diff == 0 {
+            return Status::BadLevel(i);
+        };
+        match direction {
+            Direction::Down => {
+                if diff < 0 {
+                    return Status::BadLevel(i);
+                };
+            }
+            Direction::Up => {
+                if diff > 0 {
+                    return Status::BadLevel(i);
+                };
+            }
+            Direction::Undefined => {
+                if diff > 0 {
+                    direction = Direction::Down
+                } else {
+                    direction = Direction::Up
+                }
+            }
+        };
+        last_level = level;
+    }
+    Status::Safe
+}
+
+#[derive(Debug, Eq, PartialEq)]
+enum Status {
+    Safe,
+    BadLevel(usize),
+}
+
+#[derive(Debug)]
 enum Direction {
-    UP,
-    DOWN,
+    Undefined,
+    Up,
+    Down,
 }
 
 #[cfg(test)]
@@ -78,7 +115,31 @@ mod tests {
 1 3 2 4 5
 8 6 4 4 1
 1 3 6 7 9";
-        assert_eq!("2", process(input)?);
+        assert_eq!("4", process(input)?);
+        Ok(())
+    }
+
+    #[test]
+    fn change_in_direction() -> miette::Result<()> {
+        let input = "61 60 62 64 65 66 69";
+
+        assert_eq!("1", process(input)?);
+        Ok(())
+    }
+
+    #[test]
+    fn change_in_direction_remove_first() -> miette::Result<()> {
+        let input = "3 1 2 4 5";
+
+        assert_eq!("1", process(input)?);
+        Ok(())
+    }
+
+    #[test]
+    fn bug() -> miette::Result<()> {
+        let input = "3 1 2 4 5";
+
+        assert_eq!("1", process(input)?);
         Ok(())
     }
 }

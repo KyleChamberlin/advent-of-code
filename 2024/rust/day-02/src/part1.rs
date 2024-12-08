@@ -17,9 +17,9 @@ pub fn process(input: &str) -> miette::Result<String> {
             continue;
         };
         let direction: Direction = if (first_level - second_level) < 0 {
-            Direction::DOWN
+            Direction::Down
         } else {
-            Direction::UP
+            Direction::Up
         };
         let mut last_level = second_level;
         for level in levels {
@@ -32,12 +32,12 @@ pub fn process(input: &str) -> miette::Result<String> {
             };
 
             match direction {
-                Direction::UP => {
+                Direction::Up => {
                     if diff < 0 {
                         continue 'report;
                     };
                 }
-                Direction::DOWN => {
+                Direction::Down => {
                     if diff > 0 {
                         continue 'report;
                     };
@@ -53,8 +53,8 @@ pub fn process(input: &str) -> miette::Result<String> {
 }
 
 enum Direction {
-    UP,
-    DOWN,
+    Up,
+    Down,
 }
 
 #[cfg(test)]

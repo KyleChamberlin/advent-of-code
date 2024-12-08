@@ -1,7 +1,5 @@
 use std::iter::zip;
 
-use nom::combinator::rest;
-
 #[tracing::instrument]
 pub fn process(input: &str) -> miette::Result<String> {
     let mut left = vec![];
