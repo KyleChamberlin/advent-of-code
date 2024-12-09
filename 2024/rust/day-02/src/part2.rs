@@ -50,7 +50,7 @@ impl Without for Vec<isize> {
         if i >= self.len() {
             panic!("you done fucked up")
         }
-        let mut vec =  self.clone();
+        let mut vec = self.clone();
         vec.remove(i);
 
         vec
