@@ -8,7 +8,11 @@ use nom::{
 
 #[tracing::instrument]
 pub fn process(input: &str) -> miette::Result<String> {
-    Ok(parse(input).iter().map(|exp| exp.evaluate()).sum::<usize>().to_string())
+    Ok(parse(input)
+        .iter()
+        .map(|exp| exp.evaluate())
+        .sum::<usize>()
+        .to_string())
 }
 
 #[derive(PartialEq, Eq, Debug, Clone, Copy)]
@@ -99,9 +103,17 @@ mod tests {
         Ok(())
     }
 
-#[test]
-fn expression() -> miette::Result<()> {
-        assert_eq!(Expression { operation: Operation::Multiply, left: 2, right: 3}.evaluate(), 6);
+    #[test]
+    fn expression() -> miette::Result<()> {
+        assert_eq!(
+            Expression {
+                operation: Operation::Multiply,
+                left: 2,
+                right: 3
+            }
+            .evaluate(),
+            6
+        );
         Ok(())
     }
 }
